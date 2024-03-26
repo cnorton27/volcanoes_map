@@ -207,8 +207,47 @@
                 data: 'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/tectonic_plates_GeoJSON/PB2002_plates.json' // Replace with the URL of your GeoJSON data
             });
 
+            map.addSource('tectonic_boundaries', {
+                type: 'geojson',
+                data: 'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/tectonic_plates_GeoJSON/PB2002_boundaries.json' // Replace with the URL of your GeoJSON data
+            });
+
+            map.loadImage(
+            'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volcano-eruption-illustration-free.png',
+            (error, image) => {
+                if (error) throw error;
+                map.addImage('volcano_pic', image);
+            
+
+                map.addLayer({
+                    id: 'highlighted_volcanoes',
+                    type: 'symbol',
+                    source: 'volcanoes_data',
+                    layout: {
+                        'icon-image': 'volcano_pic',
+                        'icon-size': 0.05
+                    },
+                'filter': ['in', 'type', '']
+            });
+        });
+
             map.addLayer({
-                id: 'highlighted-volcanoes',
+            id: 'tectonic_boundaries',
+            type: 'line',
+            source: 'tectonic_boundaries',
+            layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            paint: {
+                'line-color': '#FFC59E',
+                'line-width': 3
+            }
+        });
+
+
+            map.addLayer({
+                id: 'poly_queery_volcanoes',
                 type: 'circle',
                 source: 'volcanoes_data',
                 paint: {
@@ -218,7 +257,7 @@
                     'circle-stroke-color': '#fff',
                     'circle-opacity': 1
                 },
-                'filter': ['in', 'type', '']
+                'filter': ['in', 'coordinates', '']
             });
 
 
@@ -240,9 +279,9 @@
                     type: 'fill',
                     source: 'tectonic_plates',
                     paint: {
-                        'fill-outline-color': '#11b4da',
-                        'fill-color': '#11b4da',
-                        'fill-opacity': 0.5
+                        'fill-outline-color': '#FC4C26',
+                        'fill-color': 'rgb(80, 37, 34)',
+                        'fill-opacity': 0.19
                     }
                 },
                 // Place polygons under volcanoes
@@ -331,7 +370,7 @@
 
                     // set filter for highlighted plants layer, uses ID property to ensure no duplicates
                     const coords = features.map((feature) => feature.properties.vol_number);
-                    map.setFilter('highlighted-volcanoes', ['in', 'ID', ...coords]);
+                    map.setFilter('highlighted_volcanoes', ['in', 'ID', ...coords]);
                 }
 
                 map.dragPan.enable();
@@ -340,7 +379,7 @@
             //changes mouse to pointer
             map.on('mousemove', (e) => {
                 const features = map.queryRenderedFeatures(e.point, {
-                    layers: ['highlighted-volcanoes']
+                    layers: ['highlighted_volcanoes']
                 });
 
             });
@@ -397,7 +436,7 @@
 
                 const current_species = feature.properties.volcano_name
 
-                const relatedplants = map.querySourceFeatures('highlighted-volcanoes', {  //'volcanoes'
+                const relatedplants = map.querySourceFeatures('highlighted_volcanoes', {  //'volcanoes'
                     sourceLayer: 'original',
                     filter: ['in', 'feature_collection_name', current_species]
                 });
@@ -423,7 +462,7 @@
                 overlay.appendChild(ID);
 
 
-                map.setFilter('highlighted-volcanoes', [
+                map.setFilter('highlighted_volcanoes', [
                     'in',
                     'type',
                     feature.properties.type
@@ -442,7 +481,7 @@
             map.on('mouseleave', 'volcanoes', () => {
                 map.getCanvas().style.cursor = '';
                 popup3.remove();
-                map.setFilter('highlighted-volcanoes', ['in', 'type', '']);
+                map.setFilter('highlighted_volcanoes', ['in', 'type', '']);
                 overlay.style.display = 'none';
             });
             
@@ -453,8 +492,9 @@
         layers: ['tectonic_plates']
     });
 
+console.log(features.geometry.coordinates)
 
-  //  if (features.length) {
+    if (features.length) {
         var clickedPolygon = features[0];
 
         // Get all points features from the points layer
@@ -474,6 +514,8 @@
             type: 'FeatureCollection',
             features: pointsWithinPolygon
         };
+
+        console.log(filteredPointsGeoJSON)
         
         if (map.getLayer('queery-volcanoes')) {
             map.removeLayer('queery-volcanoes');
@@ -493,11 +535,9 @@
             }
         });
 
-        console.log(pointsWithinPolygon)
+    //    console.log(pointsWithinPolygon)
 
-        // Remove existing "highlighted-points" layer if it exists
-
-      //  }
+        }
     }
 });
 
