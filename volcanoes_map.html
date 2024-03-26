@@ -157,11 +157,11 @@
         mapboxgl.accessToken = 'pk.eyJ1Ijoibm9ydG9uMjciLCJhIjoiY2xoam9hNHI5MGpuMjNscWtlcTF2dTN3dyJ9.xx0qCx-woV7mYFkrMNQmiA';
         const map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/norton27/clt6q7cpd00g601o8dhbr3nvw', //insert style here, here are some pre-set options https://docs.mapbox.com/api/maps/styles/
+            style: 'mapbox://styles/norton27/clu7zk2ho009e01rafz7yefwp', //insert style here, here are some pre-set options https://docs.mapbox.com/api/maps/styles/
             center: [-123.16761577284362, 49.68914344599266], //insert coordinates here
-            zoom: 9,
-            pitch: 60,
-            bearing: 30
+            zoom: 2,
+            //pitch: 60,
+            //  bearing: 30
         });
 
         map.addControl(new mapboxgl.NavigationControl());
@@ -197,15 +197,20 @@
             let current;
             let box;
 
-            map.addSource('plants_data', {
+            map.addSource('volcanoes_data', {
                 type: 'geojson',
-                data: 'https://raw.githubusercontent.com/cnorton27/Squamish_plants_map/main/withID.geojson' // Replace with the URL of your GeoJSON data
+                data: 'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volcanoes.geojson' // Replace with the URL of your GeoJSON data
+            });
+
+            map.addSource('tectonic_plates', {
+                type: 'geojson',
+                data: 'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/tectonic_plates_GeoJSON/PB2002_plates.json' // Replace with the URL of your GeoJSON data
             });
 
             map.addLayer({
-                id: 'highlighted-plants',
+                id: 'highlighted-volcanoes',
                 type: 'circle',
-                source: 'plants_data',
+                source: 'volcanoes_data',
                 paint: {
                     'circle-color': '#AFFF00',
                     'circle-radius': 5,
@@ -213,15 +218,14 @@
                     'circle-stroke-color': '#fff',
                     'circle-opacity': 1
                 },
-                //'filter' : ['==', ['get', 'feature_collection_name'], current_species]
-                'filter': ['in', 'feature_collection_name', '']
+                'filter': ['in', 'type', '']
             });
 
 
             map.addLayer({
-                id: 'squam-plants',
+                id: 'volcanoes',
                 type: 'circle',
-                source: 'plants_data',
+                source: 'volcanoes_data',
                 paint: {
                     'circle-color': '#11b4da',
                     'circle-radius': 6,
@@ -230,6 +234,20 @@
             },
             );
 
+            map.addLayer(
+                {
+                    id: 'tectonic_plates',
+                    type: 'fill',
+                    source: 'tectonic_plates',
+                    paint: {
+                        'fill-outline-color': '#11b4da',
+                        'fill-color': '#11b4da',
+                        'fill-opacity': 0.5
+                    }
+                },
+                // Place polygons under volcanoes
+             //   'volcanoes'
+            );
 
             canvas.addEventListener('mousedown', mouseDown, true);
 
@@ -304,7 +322,7 @@
 
                 if (bbox) {
                     const features = map.queryRenderedFeatures(bbox, {
-                        layers: ['squam-plants']
+                        layers: ['volcanoes']
                     });
 
                     if (features.length >= 10000) {
@@ -312,8 +330,8 @@
                     }
 
                     // set filter for highlighted plants layer, uses ID property to ensure no duplicates
-                    const coords = features.map((feature) => feature.properties.ID);
-                    map.setFilter('highlighted-plants', ['in', 'ID', ...coords]);
+                    const coords = features.map((feature) => feature.properties.vol_number);
+                    map.setFilter('highlighted-volcanoes', ['in', 'ID', ...coords]);
                 }
 
                 map.dragPan.enable();
@@ -322,25 +340,25 @@
             //changes mouse to pointer
             map.on('mousemove', (e) => {
                 const features = map.queryRenderedFeatures(e.point, {
-                    layers: ['highlighted-plants']
+                    layers: ['highlighted-volcanoes']
                 });
 
             });
 
             //popup ... might delete or change info to a picture of the plants from iNaturalist later
-            map.on('click', 'squam-plants', (e) => {
-                const coordinates = e.features[0].geometry.coordinates.slice();
-                const description = e.features[0].properties.feature_collection_name;
+         //   map.on('click', 'volcanoes', (e) => {
+         //       const coordinates = e.features[0].geometry.coordinates.slice();
+         //       const description = e.features[0].properties.volcano_name;
 
-                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                }
+        //        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        //            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+       //         }
 
-                new mapboxgl.Popup()
-                    .setLngLat(coordinates)
-                    .setText(description)
-                    .addTo(map);
-            });
+      //          new mapboxgl.Popup()
+      //              .setLngLat(coordinates)
+       //             .setText(description)
+       //             .addTo(map);
+     //       });
 
 
         });
@@ -372,14 +390,14 @@
             }
 
 
-            map.on('mousemove', 'squam-plants', (e) => {
+            map.on('mousemove', 'volcanoes', (e) => {
 
                 // feature = plant that mouse is hovering over
                 const feature = e.features[0];
 
-                const current_species = feature.properties.feature_collection_name
+                const current_species = feature.properties.volcano_name
 
-                const relatedplants = map.querySourceFeatures('highlighted-plants', {  //'squam-plants'
+                const relatedplants = map.querySourceFeatures('highlighted-volcanoes', {  //'volcanoes'
                     sourceLayer: 'original',
                     filter: ['in', 'feature_collection_name', current_species]
                 });
@@ -391,12 +409,12 @@
 
                 const title = document.createElement('strong');
                 title.textContent =
-                    feature.properties.feature_collection_name
+                    feature.properties.volcano_name
 
                 const ID = document.createElement('div');
                 ID.textContent =
-                    'Total plants:' + " " +
-                    feature.properties.species_count
+                    'Volcano type:' + " " +
+                    feature.properties.type
 
                 overlay.innerHTML = '';
                 overlay.style.display = 'block';
@@ -405,29 +423,86 @@
                 overlay.appendChild(ID);
 
 
-                map.setFilter('highlighted-plants', [
+                map.setFilter('highlighted-volcanoes', [
                     'in',
-                    'feature_collection_name',
-                    feature.properties.feature_collection_name
+                    'type',
+                    feature.properties.type
                 ]);
 
 
                 // Display a popup
-              //  popup3
-           //         .setLngLat(e.lngLat)
-             //       .setText(feature.properties.feature_collection_name)
-               //     .addTo(map);
+                popup3
+                    .setLngLat(e.lngLat)
+                    .setText(feature.properties.volcano_name)
+                    .addTo(map);
             });
 
 
 
-            map.on('mouseleave', 'squam-plants', () => {
+            map.on('mouseleave', 'volcanoes', () => {
                 map.getCanvas().style.cursor = '';
                 popup3.remove();
-                map.setFilter('highlighted-plants', ['in', 'feature_collection_name', '']);
+                map.setFilter('highlighted-volcanoes', ['in', 'type', '']);
                 overlay.style.display = 'none';
             });
+            
+            
+            map.on('click', function(e) {
+    // Identify the clicked polygon
+    var features = map.queryRenderedFeatures(e.point, {
+        layers: ['tectonic_plates']
+    });
+
+
+  //  if (features.length) {
+        var clickedPolygon = features[0];
+
+        // Get all points features from the points layer
+        var allPoints = map.queryRenderedFeatures(e.point, {
+            layers: ['volcanoes']
         });
+
+        console.log(allPoints)
+
+        // Filter points that are within the clicked polygon
+        var pointsWithinPolygon = allPoints.filter(function(feature) {
+            return turf.booleanPointInPolygon(feature.geometry.coordinates, clickedPolygon.geometry.coordinates);
+        });
+
+        // Create a GeoJSON object for the filtered points
+        var filteredPointsGeoJSON = {
+            type: 'FeatureCollection',
+            features: pointsWithinPolygon
+        };
+        
+        if (map.getLayer('queery-volcanoes')) {
+            map.removeLayer('queery-volcanoes');
+
+        // Add a new layer to display the filtered points as highlighted features
+        map.addLayer({
+            id: 'queery-volcanoes',
+            type: 'circle',
+            source: {
+                type: 'geojson',
+                data: filteredPointsGeoJSON
+            },
+            paint: {
+                'circle-color': '#FF0000',
+                'circle-radius': 6,
+                'circle-opacity': 0.8
+            }
+        });
+
+        console.log(pointsWithinPolygon)
+
+        // Remove existing "highlighted-points" layer if it exists
+
+      //  }
+    }
+});
+
+});
+
 
 
     </script>

@@ -1,0 +1,31 @@
+{
+    "pipeline": [
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_040450.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_041352.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_041715.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_042010.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_042633.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_042744.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_042915.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_043035.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_043253.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_043552.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M1_043905.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M2_063623.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M2_063749.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M2_064125.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M2_064508.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190528_M2_065151.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190527_M1_082604.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190527_M1_083014.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190527_M1_083425.laz",
+        "NatGeo_Everest_WGS84_UTM45N_190527_M1_084027.laz",
+        {
+            "type": "filters.merge"
+        },
+        {
+            "type": "writers.las",
+            "filename": "testing_merge.las"
+        }
+    ]
+}
