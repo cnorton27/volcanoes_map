@@ -5,13 +5,16 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Squamish Plants</title>
+    <title>Exploring Volcanoes</title>
 
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
     <!-- Turf code. -->
     <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap" rel="stylesheet">
 
 
     <style>
@@ -29,7 +32,7 @@
 
         .boxdraw {
             background: rgba(56, 135, 190, 0.1);
-            border: 2px solid #3887be;
+            border: 2px solid #e84949;
             position: absolute;
             top: 0;
             left: 0;
@@ -87,19 +90,44 @@
         }
 
         .button:hover {
-            background-color: #c8a4d4;
+            background-color: #11b4da;
             /* Darker green background on hover */
             color: white;
             /* White text on hover */
         }
 
+
+                /* Style the popup container */
         .mapboxgl-popup {
-            max-width: 400px;
-            font:
-                12px/20px 'Helvetica Neue',
-                Arial,
-                Helvetica,
-                sans-serif;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            max-width: 300px;
+        }
+
+        /* Style the popup content */
+        .mapboxgl-popup-content {
+            color: #333333;
+            font-size: 14px;
+        }
+
+        /* Style the popup close button */
+        .mapboxgl-popup-close-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 5px;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .mapboxgl-popup-close-button:hover {
+            color: #000000;
         }
 
         .map-overlay {
@@ -131,7 +159,7 @@
 
     <div id="popup_title" class="popup_title">
         <span class="close" onclick="togglePopup()">&times;</span>
-        <img id="popup_titleImg" src="webmap-indigenous-plants-01.png" alt="Popup Image">
+        <img id="popup_titleImg" src="volcanoes-intro.png" alt="Popup Image">
     </div>
 
     <button class="button" onclick="togglePopup()">Toggle Image</button>
@@ -160,8 +188,6 @@
             style: 'mapbox://styles/norton27/clu7zk2ho009e01rafz7yefwp', //insert style here, here are some pre-set options https://docs.mapbox.com/api/maps/styles/
             center: [-123.16761577284362, 49.68914344599266], //insert coordinates here
             zoom: 2,
-            //pitch: 60,
-            //  bearing: 30
         });
 
         map.addControl(new mapboxgl.NavigationControl());
@@ -213,44 +239,45 @@
             });
 
             map.loadImage(
-            'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volcanoes_rotate.png',
-            (error, image) => {
-                if (error) throw error;
-                map.addImage('volcano_pic', image);
-            
+                'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volcanoes_rotate.png',
+                (error, image) => {
+                    if (error) throw error;
+                    map.addImage('volcano_pic', image);
 
-                map.addLayer({
-                    id: 'highlighted_volcanoes',
-                    type: 'symbol',
-                    source: 'volcanoes_data',
-                    layout: {
-                        'icon-image': 'volcano_pic',
-                      //  'icon-size': 0.015,
-                        'icon-size': [
-                            'interpolate', ['linear'], ['zoom'],
-                            // Define zoom level and corresponding icon size pairs
-                            // For example, adjust the size at zoom levels 10 and 15
-                            10, 0.03,  // Zoom level 10, icon size 1
-                            15, 0.05   // Zoom level 15, icon size 2
-                        ]
-                    },
-                'filter': ['in', 'type', '']
-            });
-        });
+
+                    map.addLayer({
+                        id: 'highlighted_volcanoes',
+                        type: 'symbol',
+                        source: 'volcanoes_data',
+                        layout: {
+                            'icon-image': 'volcano_pic',
+                            //  'icon-size': 0.015,
+                            'icon-size': [
+                                'interpolate', ['linear'], ['zoom'],
+                                // Define zoom level and corresponding icon size pairs
+                                // For example, adjust the size at zoom levels 10 and 15
+                                10, 0.03,  // Zoom level 10, icon size 1
+                                15, 0.05   // Zoom level 15, icon size 2
+                            ]
+                        },
+                        'filter': ['in', 'type', '']
+                    });
+                });
 
             map.addLayer({
-            id: 'tectonic_boundaries',
-            type: 'line',
-            source: 'tectonic_boundaries',
-            layout: {
-                'line-join': 'round',
-                'line-cap': 'round'
-            },
-            paint: {
-                'line-color': '#FFC59E',
-                'line-width': 3
-            }
-        });
+                id: 'tectonic_boundaries',
+                type: 'line',
+                source: 'tectonic_boundaries',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#FFC59E',
+                    'line-width': 5
+                }
+            });
+            
 
 
             map.addLayer({
@@ -264,9 +291,8 @@
                     'circle-stroke-color': '#fff',
                     'circle-opacity': 1
                 },
-                'filter': ['in', 'coordinates', '']
+                'filter': ['in', 'id', '']
             });
-
 
             map.addLayer({
                 id: 'volcanoes',
@@ -292,7 +318,7 @@
                     }
                 },
                 // Place polygons under volcanoes
-             //   'volcanoes'
+                //   'volcanoes'
             );
 
             canvas.addEventListener('mousedown', mouseDown, true);
@@ -375,7 +401,7 @@
                         return window.alert('Select a smaller number of features');
                     }
 
-                    // set filter for highlighted plants layer, uses ID property to ensure no duplicates
+                    // set filter for highlighted volcanoes layer, uses ID property to ensure no duplicates
                     const coords = features.map((feature) => feature.properties.vol_number);
                     map.setFilter('highlighted_volcanoes', ['in', 'ID', ...coords]);
                 }
@@ -391,24 +417,31 @@
 
             });
 
-            //popup ... might delete or change info to a picture of the plants from iNaturalist later
-         //   map.on('click', 'volcanoes', (e) => {
-         //       const coordinates = e.features[0].geometry.coordinates.slice();
-         //       const description = e.features[0].properties.volcano_name;
+// popup showing tectonic plate name
+map.on('click', function(e) {
+    // Get features at the clicked point from a specific layer
+    var features = map.queryRenderedFeatures(e.point, { layers: ['tectonic_plates'] });
 
-        //        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        //            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-       //         }
+    // Check if any features were found
+    if (features.length > 0) {
+        // Extract properties from the clicked feature
+        var properties = features[0].properties;
 
-      //          new mapboxgl.Popup()
-      //              .setLngLat(coordinates)
-       //             .setText(description)
-       //             .addTo(map);
-     //       });
+        // Create HTML content for the popup
+        var popupContent = '<h3>' + properties.PlateName + '</h3>'; // Example: Displaying name property
+
+        // Create a new popup
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(popupContent)
+            .addTo(map);
+    }
+});
 
 
 
-        ////////////////search similar features through mouse-over/////////////////////////////////////////////////////////////////////////
+
+            ////////////////search similar features through mouse-over/////////////////////////////////////////////////////////////////////////
 
             const overlay = document.getElementById('map-overlay');
 
@@ -435,35 +468,47 @@
 
             map.on('mousemove', 'volcanoes', (e) => {
 
-                // feature = plant that mouse is hovering over
+                // feature = volcano that mouse is hovering over
                 const feature = e.features[0];
 
                 const current_species = feature.properties.volcano_name
 
-                const relatedplants = map.querySourceFeatures('highlighted_volcanoes', {  //'volcanoes'
+                const relatedvolcanoes = map.querySourceFeatures('highlighted_volcanoes', {  
                     sourceLayer: 'original',
-                    filter: ['in', 'feature_collection_name', current_species]
+                    filter: ['in', 'volcano_name', current_species]
                 });
 
-                const uniqueplants = getUniqueFeatures(relatedplants, 'ID');
+                const uniquevolcanoes = getUniqueFeatures(relatedvolcanoes, 'ID');
 
-
-
-
+                
+                // title for map overlay
                 const title = document.createElement('strong');
                 title.textContent =
+                'Volcano name:' + " " +
                     feature.properties.volcano_name
-
+                //content for map overlay
                 const ID = document.createElement('div');
                 ID.textContent =
                     'Volcano type:' + " " +
                     feature.properties.type
+                
+                const content = document.createElement('div');
+                content.textContent =
+                    'Last known eruption:' + " " +
+                    feature.properties.last_nown_eruption
+
+                const vol_location = document.createElement('div');
+                vol_location.textContent =
+                    "Location:  " + feature.properties.country + ", " +
+                    feature.properties.location
 
                 overlay.innerHTML = '';
                 overlay.style.display = 'block';
 
                 overlay.appendChild(title);
                 overlay.appendChild(ID);
+                overlay.appendChild(content);
+                overlay.appendChild(vol_location);
 
 
                 map.setFilter('highlighted_volcanoes', [
@@ -474,128 +519,89 @@
 
             });
 
-
-
             map.on('mouseleave', 'volcanoes', () => {
                 map.getCanvas().style.cursor = '';
                 popup3.remove();
                 map.setFilter('highlighted_volcanoes', ['in', 'type', '']);
                 overlay.style.display = 'none';
             });
-    
-            
 
 
-  //// buffer around tectonic boundary          
+///////////////////// buffer around tectonic boundary  /////////////////////////         
 
-  map.on('click', function(e) {
-    var features = map.queryRenderedFeatures(e.point, {
-        layers: ['tectonic_boundaries']
-    });
+            map.on('click', function (e) {
+                var features = map.queryRenderedFeatures(e.point, {
+                    layers: ['tectonic_boundaries']
+                });
 
- //   var features = map.queryRenderedFeatures(e.point);
+                // Check if any features were found
+                if (features.length > 0) {
+                    var clickedLine = features[0];
+                    console.log('Clicked line:', clickedLine);
 
- var turfLineString;
-    // Loop through the clicked features
-    features.forEach(function(feature) {
-        // Check if the feature is of type LineString
-        if (feature.geometry.type === 'LineString') {
-            // Extract the coordinates from the feature
-            var coordinates = feature.geometry.coordinates;
+                    // Extract the coordinates from the clicked feature
+                    var coordinates = clickedLine.geometry.coordinates;
 
-            // Create a Turf LineString
-            turfLineString = turf.lineString(coordinates);
+                    // Create a Turf LineString from the clicked feature's coordinates
+                    var turfLineString = turf.lineString(coordinates);
 
-            // Now you have a Turf LineString object that you can use
-            console.log('Turf LineString:', turfLineString);
-        }
-    });
+                    // Remove the existing buffer layer if it exists
+                    if (map.getLayer('buffer-layer')) {
+                        map.removeLayer('buffer-layer');
+                    }
 
-    // Check if any features were found
-    if (features.length > 0) {
-        var clickedLine = features[0];
-        console.log('Clicked line:', clickedLine);
+                    // Remove the existing buffer source if it exists
+                    if (map.getSource('buffer')) {
+                        map.removeSource('buffer');
+                    }
 
+                    // Create a new buffer around the Turf LineString
+                    const bufferWidth = 200; // Adjust the buffer width as needed
+                    const buffer = turf.buffer(turfLineString, bufferWidth, { units: 'kilometers' });
 
-// Remove the existing buffer source if it exists
-    if (map.getSource('buffer')) {
-        map.removeSource('buffer');
+                    // Add the buffer as a GeoJSON source to the map
+                    map.addSource('buffer', {
+                        type: 'geojson',
+                        data: buffer
+                    });
+
+                    // Add a layer to display the buffer
+                    map.addLayer({
+                        id: 'buffer-layer',
+                        type: 'fill',
+                        source: 'buffer',
+                        paint: {
+                            'fill-color': '#FEFFD4',
+                            'fill-opacity': 0.6
+                        },
+                        before: 'volcanoes_mapbox'
+                    });
+
+////////////////////// this section is an attempt to highlight a points layer of volcanoes that fall within the polygon
+
+        // Extract the extent of the buffer
+        var bufferExtent = turf.bbox(buffer);
+
+        // Query points from the other layer that fall within the buffer
+        var pointsWithinBuffer = map.querySourceFeatures('point-layer', {
+            sourceLayer: 'volcanoes', // Replace 'point-layer' with the ID of your point layer
+            filter: ['within', buffer] // Filter points within the buffer
+        });
+
+        console.log('Points within buffer:', pointsWithinBuffer); // Log points to console
+
+        // Extract IDs of points within buffer
+        var pointIds = pointsWithinBuffer.map(function(point) {
+            return point.id;
+        });
+
+        // Apply filter to the point layer
+        map.setFilter('poly_queery_volcanoes', ['in', 'id'].concat(pointIds));
     }
 
-        const bufferWidth = 5; // Adjust the buffer width as needed
-        const buffer = turf.buffer(turfLineString, bufferWidth, {units: 'kilometers'});
+            });  //map on click tag
 
-        // Add the buffer as a GeoJSON source to the map
-        map.addSource('buffer', {
-            type: 'geojson',
-            data: buffer
-        });
-
-        // Check if the buffer layer exists and remove it
-        if (map.getLayer('buffer-layer')) {
-            map.removeLayer('buffer-layer');
-        }
-
-
-        // Add a layer to display the buffer
-        map.addLayer({
-            id: 'buffer-layer',
-            type: 'fill',
-            source: 'buffer',
-            paint: {
-                'fill-color': '#FC4C26',
-                'fill-opacity': 0.6
-            }
-        });
-    }
-
-
-    if (features.length) {
-        var clickedPolygon = features[0];
-
-        // Get all points features from the points layer
-        var allPoints = map.queryRenderedFeatures(e.point, {
-            layers: ['volcanoes']
-        });
-
-        // Filter points that are within the clicked polygon
-        var pointsWithinPolygon = allPoints.filter(function(feature) {
-            return turf.booleanPointInPolygon(feature.geometry.coordinates, clickedPolygon.geometry.coordinates);
-        });
-
-        // Create a GeoJSON object for the filtered points
-        var filteredPointsGeoJSON = {
-            type: 'FeatureCollection',
-            features: pointsWithinPolygon
-        };
-
-        
-        if (map.getLayer('queery-volcanoes')) {
-            map.removeLayer('queery-volcanoes');
-
-        // Add a new layer to display the filtered points as highlighted features
-        map.addLayer({
-            id: 'queery-volcanoes',
-            type: 'circle',
-            source: {
-                type: 'geojson',
-                data: filteredPointsGeoJSON
-            },
-            paint: {
-                'circle-color': '#FF0000',
-                'circle-radius': 6,
-                'circle-opacity': 0.8
-            }
-        });
-
-    //    console.log(pointsWithinPolygon)
-
-        }
-    }
-
-});  //map on click tag
-
-});  // map on load tag
+        });  // map on load tag
 
 
 
