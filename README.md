@@ -20,6 +20,7 @@ W3Schools - for CSS styling, especially useful for the intro card
 Chat GPT - very useful for searching up coding error messages I would get in my console
 
 The map:
+https://cnorton27.github.io/volcanoes_map/volcanoes_map.html
 
 
 Global Volcano Map: 
