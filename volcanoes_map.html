@@ -482,46 +482,72 @@
                 map.setFilter('highlighted_volcanoes', ['in', 'type', '']);
                 overlay.style.display = 'none';
             });
+    
             
+
+
   //// buffer around tectonic boundary          
 
-            map.on('click', function(e) {
-    // Identify the clicked polygon
+  map.on('click', function(e) {
     var features = map.queryRenderedFeatures(e.point, {
         layers: ['tectonic_boundaries']
     });
 
-     // Check if any features were found
-        if (features.length > 0) {
-      var clickedLine = features[0];
-      console.log('Clicked line:', clickedLine);
-    }
+ //   var features = map.queryRenderedFeatures(e.point);
 
+ var turfLineString;
+    // Loop through the clicked features
+    features.forEach(function(feature) {
+        // Check if the feature is of type LineString
+        if (feature.geometry.type === 'LineString') {
+            // Extract the coordinates from the feature
+            var coordinates = feature.geometry.coordinates;
 
-    const bufferWidth = 0.01; // Adjust the buffer width as needed
-    const buffer = turf.buffer(clickedLine, bufferWidth, {units: 'kilometers'});
+            // Create a Turf LineString
+            turfLineString = turf.lineString(coordinates);
 
-
-  // Add the buffer as a GeoJSON source to the map
-    map.addSource('buffer', {
-      type: 'geojson',
-      data: buffer
+            // Now you have a Turf LineString object that you can use
+            console.log('Turf LineString:', turfLineString);
+        }
     });
 
-    if (map.getLayer('buffer')) {
-            map.removeLayer('buffer');
+    // Check if any features were found
+    if (features.length > 0) {
+        var clickedLine = features[0];
+        console.log('Clicked line:', clickedLine);
 
-    // Add a layer to display the buffer
-    map.addLayer({
-      id: 'buffer-layer',
-      type: 'fill',
-      source: 'buffer',
-      paint: {
-        'fill-color': '#f00',
-        'fill-opacity': 0.5
-      }
-    })
-}
+
+// Remove the existing buffer source if it exists
+    if (map.getSource('buffer')) {
+        map.removeSource('buffer');
+    }
+
+        const bufferWidth = 5; // Adjust the buffer width as needed
+        const buffer = turf.buffer(turfLineString, bufferWidth, {units: 'kilometers'});
+
+        // Add the buffer as a GeoJSON source to the map
+        map.addSource('buffer', {
+            type: 'geojson',
+            data: buffer
+        });
+
+        // Check if the buffer layer exists and remove it
+        if (map.getLayer('buffer-layer')) {
+            map.removeLayer('buffer-layer');
+        }
+
+
+        // Add a layer to display the buffer
+        map.addLayer({
+            id: 'buffer-layer',
+            type: 'fill',
+            source: 'buffer',
+            paint: {
+                'fill-color': '#FC4C26',
+                'fill-opacity': 0.6
+            }
+        });
+    }
 
 
     if (features.length) {
