@@ -213,7 +213,7 @@
             });
 
             map.loadImage(
-            'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volano_purple-02.png',
+            'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volcanoes-02.png',
             (error, image) => {
                 if (error) throw error;
                 map.addImage('volcano_pic', image);
@@ -225,7 +225,8 @@
                     source: 'volcanoes_data',
                     layout: {
                         'icon-image': 'volcano_pic',
-                        'icon-size': 0.05
+                        'icon-size': 0.05,
+                        'icon-anchor': 'bottom'
                     },
                 'filter': ['in', 'type', '']
             });
