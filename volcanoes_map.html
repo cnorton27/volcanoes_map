@@ -213,7 +213,7 @@
             });
 
             map.loadImage(
-            'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volcanoes-02.png',
+            'https://raw.githubusercontent.com/cnorton27/volcanoes_map/main/volcanoes_rotate.png',
             (error, image) => {
                 if (error) throw error;
                 map.addImage('volcano_pic', image);
@@ -225,8 +225,14 @@
                     source: 'volcanoes_data',
                     layout: {
                         'icon-image': 'volcano_pic',
-                        'icon-size': 0.05,
-                        'icon-anchor': 'bottom'
+                      //  'icon-size': 0.015,
+                        'icon-size': [
+                            'interpolate', ['linear'], ['zoom'],
+                            // Define zoom level and corresponding icon size pairs
+                            // For example, adjust the size at zoom levels 10 and 15
+                            10, 0.03,  // Zoom level 10, icon size 1
+                            15, 0.05   // Zoom level 15, icon size 2
+                        ]
                     },
                 'filter': ['in', 'type', '']
             });
@@ -401,12 +407,9 @@
      //       });
 
 
-        });
-
 
         ////////////////search similar features through mouse-over/////////////////////////////////////////////////////////////////////////
 
-        map.on('load', () => {
             const overlay = document.getElementById('map-overlay');
 
             // Create a popup, but don't add it to the map yet.
@@ -469,12 +472,6 @@
                     feature.properties.type
                 ]);
 
-
-                // Display a popup
-                popup3
-                    .setLngLat(e.lngLat)
-                    .setText(feature.properties.volcano_name)
-                    .addTo(map);
             });
 
 
@@ -486,14 +483,46 @@
                 overlay.style.display = 'none';
             });
             
-            
+  //// buffer around tectonic boundary          
+
             map.on('click', function(e) {
     // Identify the clicked polygon
     var features = map.queryRenderedFeatures(e.point, {
-        layers: ['tectonic_plates']
+        layers: ['tectonic_boundaries']
     });
 
-console.log(features.geometry.coordinates)
+     // Check if any features were found
+        if (features.length > 0) {
+      var clickedLine = features[0];
+      console.log('Clicked line:', clickedLine);
+    }
+
+
+    const bufferWidth = 0.01; // Adjust the buffer width as needed
+    const buffer = turf.buffer(clickedLine, bufferWidth, {units: 'kilometers'});
+
+
+  // Add the buffer as a GeoJSON source to the map
+    map.addSource('buffer', {
+      type: 'geojson',
+      data: buffer
+    });
+
+    if (map.getLayer('buffer')) {
+            map.removeLayer('buffer');
+
+    // Add a layer to display the buffer
+    map.addLayer({
+      id: 'buffer-layer',
+      type: 'fill',
+      source: 'buffer',
+      paint: {
+        'fill-color': '#f00',
+        'fill-opacity': 0.5
+      }
+    })
+}
+
 
     if (features.length) {
         var clickedPolygon = features[0];
@@ -502,8 +531,6 @@ console.log(features.geometry.coordinates)
         var allPoints = map.queryRenderedFeatures(e.point, {
             layers: ['volcanoes']
         });
-
-        console.log(allPoints)
 
         // Filter points that are within the clicked polygon
         var pointsWithinPolygon = allPoints.filter(function(feature) {
@@ -516,7 +543,6 @@ console.log(features.geometry.coordinates)
             features: pointsWithinPolygon
         };
 
-        console.log(filteredPointsGeoJSON)
         
         if (map.getLayer('queery-volcanoes')) {
             map.removeLayer('queery-volcanoes');
@@ -540,9 +566,10 @@ console.log(features.geometry.coordinates)
 
         }
     }
-});
 
-});
+});  //map on click tag
+
+});  // map on load tag
 
 
 
